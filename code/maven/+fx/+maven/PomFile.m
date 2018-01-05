@@ -4,7 +4,7 @@ classdef PomFile < fx.maven.internal.File
         ValidNames = 'pom[.]xml'
     end
     
-    properties( GetAccess = public, SetAccess = private, Dependent )
+    properties( GetAccess = public, SetAccess = public, Dependent )
         ArtifactId(1,:) char
     end
     
@@ -25,6 +25,20 @@ classdef PomFile < fx.maven.internal.File
                 'The artifactId is missing from "%s".', ...
                 this.FilePath );
             value = char( artifactElements.item(artifactIdIndex).getTextContent() );
+        end
+        
+        function this = set.ArtifactId( this, value )
+            artifactElements = this.ProjectNode.getElementsByTagName( 'artifactId' );
+            elementIndex = ( 1:artifactElements.getLength() ) - 1;
+            directChild = arrayfun( @(nodeIndex) artifactElements.item(nodeIndex).getParentNode() == this.ProjectNode, ...
+                elementIndex );
+            artifactIdIndex = elementIndex( directChild );
+            assert( isscalar( artifactIdIndex ), ...
+                'Maven:MissingArtifactId', ...
+                'The artifactId is missing from "%s".', ...
+                this.FilePath );
+            artifactElements.item(artifactIdIndex).setTextContent( value );
+            xmlwrite( this.FilePath, this.ProjectNode );
         end
         
     end
