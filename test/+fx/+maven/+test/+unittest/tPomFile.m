@@ -8,8 +8,8 @@ classdef tPomFile < fx.maven.test.WithCleanWorkingDirectory
         PropertyName = {...
             'ArtifactId',...
             }
-        Token = {...
-            'artifactId',...
+        PropertyValue = {...
+            'maven',...
             }
     end
     
@@ -25,16 +25,9 @@ classdef tPomFile < fx.maven.test.WithCleanWorkingDirectory
     
     methods( Test, ParameterCombination = 'sequential' )
         
-        function testCheckTokenUpdate( this, PropertyName, Token )
+        function testCheckTokenUpdate( this, PropertyName, PropertyValue )
             pomFile = fx.maven.PomFile( this.FilePath );
-            this.verifyEqual( pomFile.(PropertyName), '' );
-            pomFile.(PropertyName) = 'SomeValue';
-            this.verifyEqual( pomFile.(PropertyName), 'SomeValue' );
-            this.verifyNumElements( regexp( fileread( this.FilePath ), sprintf( '<%s>%s</%s>', Token, 'SomeValue', Token ) ), 1 );
-            pomFile.(PropertyName) = 'Some Other Value';
-            this.verifyEqual( pomFile.(PropertyName), 'Some Other Value' );
-            this.verifyNumElements( regexp( fileread( this.FilePath ), sprintf( '<%s[ ]?/>', Token ) ), 0 );
-            this.verifyNumElements( regexp( fileread( this.FilePath ), sprintf( '<%s>%s</%s>', Token, 'Some Other Value', Token ) ), 1 );
+            this.verifyEqual( pomFile.(PropertyName), PropertyValue );
         end
         
     end

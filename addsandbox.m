@@ -1,7 +1,7 @@
-function addsandbox()
-%     if ~isempty( ver( 'fcam' ) )
-%         fx.fcam.command.addsandbox();
-%     else
+function addsandbox( varargin )
+    if ~isempty( ver( 'maven' ) )
+        fx.maven.command.addsandbox( varargin{:} );
+    else
         thisPath = fileparts( mfilename( 'fullpath' ) );
         addpath( fullfile(...
             thisPath,...
@@ -12,5 +12,5 @@ function addsandbox()
             thisPath,...
             'test' ), ...
             '-end' );
-%     end
+    end
 end

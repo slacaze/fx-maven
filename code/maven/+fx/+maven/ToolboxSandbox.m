@@ -29,6 +29,7 @@ classdef ToolboxSandbox < handle
         ContentsFile(1,:) char
         SourceCodeFolder(1,:) char
         TestFolder(1,:) char
+        TestPackages(:,2) cell
     end
     
     methods
@@ -124,6 +125,10 @@ classdef ToolboxSandbox < handle
                 'test' );
         end
         
+        function value = get.TestPackages( this )
+            value = this.Pom.TestPackages;
+        end
+        
     end
     
     methods( Access = public )
@@ -172,12 +177,130 @@ classdef ToolboxSandbox < handle
     
     methods( Access = public )
         
-%         function addToPath( this )
-%             this.verifyConfigFileExist();
-%             addpath( this.TestFolder, '-end' )
-%             addpath( this.SourceCodeFolder, '-end' )
-%         end
-%         
+        function addToPath( this )
+            addpath( this.TestFolder, '-end' )
+            addpath( this.SourceCodeFolder, '-end' )
+        end
+        
+        function removeFromPath( this )
+            rmpath( this.TestFolder )
+            rmpath( this.SourceCodeFolder )
+        end
+        
+        function testResults = test( this, suiteName, varargin )
+            if nargin < 2
+                suiteName = '';
+            end
+            if isempty( this.TestPackages )
+                testResults = matlab.unittest.TestResult.empty;
+                return;
+            end
+            if isempty( suiteName )
+                testIndex = 1;
+            else
+                testIndex = find( strcmp( suiteName, this.TestPackages(:,1) ), 1, 'first' );
+            end
+            if isempty( testIndex )
+                testResults = matlab.unittest.TestResult.empty;
+                return;
+            else
+                testPackage = this.TestPackages{testIndex,2};
+            end
+            parser = inputParser();
+            parser.addParameter( 'CodeCoverage', false, ...
+                @(x) validateattributes( x, {'logical'}, {'scalar'} ) );
+            parser.addParameter( 'JUnitTestResults', false, ...
+                @(x) validateattributes( x, {'logical'}, {'scalar'} ) );
+            parser.parse( varargin{:} );
+            inputs = parser.Results;
+            suite = matlab.unittest.TestSuite.fromPackage(...
+                testPackage,...
+                'IncludingSubpackages', true );
+            runner = matlab.unittest.TestRunner.withTextOutput();
+            if inputs.CodeCoverage
+                coberturaReport = matlab.unittest.plugins.codecoverage.CoberturaFormat(...
+                    fullfile( this.TestFolder, 'codeCoverage.xml' ) );
+                codeCoverageFolders = fx.fcam.util.getAllFolders( this.SourceCodeFolder );
+                codeCoverageFolders = fx.fcam.util.filterCodeCoveragePaths( codeCoverageFolders );
+                codeCoveragePlugin = matlab.unittest.plugins.CodeCoveragePlugin.forFolder(...
+                    codeCoverageFolders,...
+                    'IncludingSubfolders', false,...
+                    'Producing', coberturaReport );
+                runner.addPlugin( codeCoveragePlugin );
+            end
+            if inputs.JUnitTestResults
+                jUnitPlugin = matlab.unittest.plugins.XMLPlugin.producingJUnitFormat(...
+                    fullfile( this.TestFolder, 'junitResults.xml' ) );
+                runner.addPlugin( jUnitPlugin );
+            end
+            testResults = runner.run( suite );
+        end
+        
+        function package( this, outputFile )
+            if ~any( strcmp( this.SourceCodeFolder, strsplit( path, ';' ) ) )
+                addpath( this.SourceCodeFolder, '-end' );
+                removeSourceCodeFolderFromPath = onCleanup(...
+                    @() rmpath( this.SourceCodeFolder ) );
+            end
+            if any( strcmp( this.TestFolder, strsplit( path, ';' ) ) )
+                rmpath( this.TestFolder );
+                reAddTestFolderToPath = onCleanup(...
+                    @() addpath( this.TestFolder, '-end' ) );
+            end
+            this.prepareForPackaging();
+            if nargin < 2
+                outputFile = fullfile(...
+                    this.Root,...
+                    sprintf( '%s v%s.mltbx',...
+                    this.Name,...
+                    this.Version ) );
+            end
+            fx.maven.util.flushEventQueue();
+            matlab.addons.toolbox.packageToolbox( this.PrjFile, outputFile );
+            fx.maven.util.flushEventQueue();
+        end
+        
+        function testResults = testPackagedAddon( this, suiteName, varargin )
+            if nargin < 2
+                suiteName = '';
+            end
+            tempFile = sprintf( '%s.mltbx', tempname );
+            this.package( tempFile );
+            deleteFile = onCleanup( @() delete( tempFile ) );
+            fx.maven.util.flushEventQueue();
+            tempToolbox = matlab.addons.toolbox.installToolbox( tempFile, true );
+            uninstallAddOn = onCleanup(...
+                @() matlab.addons.toolbox.uninstallToolbox( tempToolbox ) );
+            fx.maven.util.flushEventQueue();
+            if any( strcmp( this.SourceCodeFolder, strsplit( path, ';' ) ) )
+                rmpath( this.SourceCodeFolder );
+                reAddSourceCodeFolderToPath = onCleanup(...
+                    @() addpath( this.SourceCodeFolder, '-end' ) );
+                reAddSourceCode = true;
+            else
+                reAddSourceCode = false;
+            end
+            if ~any( strcmp( this.TestFolder, strsplit( path, ';' ) ) )
+                addpath( this.TestFolder, '-end' );
+                removeTestFolderFromPath = onCleanup(...
+                    @() rmpath( this.TestFolder ) );
+                removeTest = true;
+            else
+                removeTest = false;
+            end
+            fx.maven.util.flushEventQueue();
+            testResults = this.test( suiteName, varargin{:} );
+            if reAddSourceCode
+                delete( reAddSourceCodeFolderToPath );
+            end
+            if removeTest
+                delete( removeTestFolderFromPath );
+            end
+            fx.maven.util.flushEventQueue();
+            delete( uninstallAddOn );
+            fx.maven.util.flushEventQueue();
+        end
+        
 %         function enableAddOn( this )
 %             addOns = matlab.addons.installedAddons();
 %             if any( strcmp( this.Guid, addOns.Identifier ) )
@@ -191,181 +314,41 @@ classdef ToolboxSandbox < handle
 %                 matlab.addons.disableAddon( this.Guid );
 %             end
 %         end
-%         
-%         function removeFromPath( this )
-%             this.verifyConfigFileExist();
-%             rmpath( this.TestFolder )
-%             rmpath( this.SourceCodeFolder )
-%         end
-%         
-%         function testResults = test( this, suiteName, varargin )
-%             this.verifyConfigFileExist();
-%             if nargin < 2
-%                 suiteName = '';
-%             end
-%             if isempty( this.Configuration.TestPackages )
-%                 testResults = matlab.unittest.TestResult.empty;
-%                 return;
-%             end
-%             if isempty( suiteName )
-%                 testIndex = 1;
-%             else
-%                 testIndex = find( strcmp( suiteName, this.Configuration.TestPackages(:,1) ), 1, 'first' );
-%             end
-%             if isempty( testIndex )
-%                 testResults = matlab.unittest.TestResult.empty;
-%                 return;
-%             else
-%                 testPackage = this.Configuration.TestPackages{testIndex,2};
-%             end
-%             parser = inputParser();
-%             parser.addParameter( 'CodeCoverage', false, ...
-%                 @(x) validateattributes( x, {'logical'}, {'scalar'} ) );
-%             parser.addParameter( 'JUnitTestResults', false, ...
-%                 @(x) validateattributes( x, {'logical'}, {'scalar'} ) );
-%             parser.parse( varargin{:} );
-%             inputs = parser.Results;
-%             suite = matlab.unittest.TestSuite.fromPackage(...
-%                 testPackage,...
-%                 'IncludingSubpackages', true );
-%             runner = matlab.unittest.TestRunner.withTextOutput();
-%             if inputs.CodeCoverage
-%                 coberturaReport = matlab.unittest.plugins.codecoverage.CoberturaFormat(...
-%                     fullfile( this.TestFolder, 'codeCoverage.xml' ) );
-%                 codeCoverageFolders = fx.fcam.util.getAllFolders( this.SourceCodeFolder );
-%                 codeCoverageFolders = fx.fcam.util.filterCodeCoveragePaths( codeCoverageFolders );
-%                 codeCoveragePlugin = matlab.unittest.plugins.CodeCoveragePlugin.forFolder(...
-%                     codeCoverageFolders,...
-%                     'IncludingSubfolders', false,...
-%                     'Producing', coberturaReport );
-%                 runner.addPlugin( codeCoveragePlugin );
-%             end
-%             if inputs.JUnitTestResults
-%                 jUnitPlugin = matlab.unittest.plugins.XMLPlugin.producingJUnitFormat(...
-%                     fullfile( this.TestFolder, 'junitResults.xml' ) );
-%                 runner.addPlugin( jUnitPlugin );
-%             end
-%             testResults = runner.run( suite );
-%         end
-%         
-%         function package( this, outputFile )
-%             this.verifyConfigFileExist();
-%             this.verifyPrjFileExist();
-%             if ~any( strcmp( this.SourceCodeFolder, strsplit( path, ';' ) ) )
-%                 addpath( this.SourceCodeFolder, '-end' );
-%                 removeSourceCodeFolderFromPath = onCleanup(...
-%                     @() rmpath( this.SourceCodeFolder ) );
-%             end
-%             if any( strcmp( this.TestFolder, strsplit( path, ';' ) ) )
-%                 rmpath( this.TestFolder );
-%                 reAddTestFolderToPath = onCleanup(...
-%                     @() addpath( this.TestFolder, '-end' ) );
-%             end
-%             this.prepareForPackaging();
-%             if nargin < 2
-%                 outputFile = fullfile(...
-%                     this.Root,...
-%                     sprintf( '%s v%s.mltbx',...
-%                     this.Name,...
-%                     this.Version ) );
-%             end
-%             fx.fcam.util.flushEventQueue();
-%             matlab.addons.toolbox.packageToolbox( this.PrjFile, outputFile );
-%             fx.fcam.util.flushEventQueue();
-%         end
-%         
-%         function testResults = testPackagedAddon( this, suiteName, varargin )
-%             this.verifyConfigFileExist();
-%             this.verifyPrjFileExist();
-%             if nargin < 2
-%                 suiteName = '';
-%             end
-%             tempFile = sprintf( '%s.mltbx', tempname );
-%             this.package( tempFile );
-%             deleteFile = onCleanup( @() delete( tempFile ) );
-%             fx.fcam.util.flushEventQueue();
-%             tempToolbox = matlab.addons.toolbox.installToolbox( tempFile, true );
-%             uninstallAddOn = onCleanup(...
-%                 @() matlab.addons.toolbox.uninstallToolbox( tempToolbox ) );
-%             fx.fcam.util.flushEventQueue();
-%             if any( strcmp( this.SourceCodeFolder, strsplit( path, ';' ) ) )
-%                 rmpath( this.SourceCodeFolder );
-%                 reAddSourceCodeFolderToPath = onCleanup(...
-%                     @() addpath( this.SourceCodeFolder, '-end' ) );
-%                 reAddSourceCode = true;
-%             else
-%                 reAddSourceCode = false;
-%             end
-%             if ~any( strcmp( this.TestFolder, strsplit( path, ';' ) ) )
-%                 addpath( this.TestFolder, '-end' );
-%                 removeTestFolderFromPath = onCleanup(...
-%                     @() rmpath( this.TestFolder ) );
-%                 removeTest = true;
-%             else
-%                 removeTest = false;
-%             end
-%             fx.fcam.util.flushEventQueue();
-%             testResults = this.test( suiteName, varargin{:} );
-%             if reAddSourceCode
-%                 delete( reAddSourceCodeFolderToPath );
-%             end
-%             if removeTest
-%                 delete( removeTestFolderFromPath );
-%             end
-%             fx.fcam.util.flushEventQueue();
-%             delete( uninstallAddOn );
-%             fx.fcam.util.flushEventQueue();
-%         end
         
     end
     
     methods( Access = private )
         
-%         function verifyConfigFileExist( this )
-%             assert( exist( this.ConfigFile, 'file' ) == 2,...
-%                 'FCAM:MissingConfigFile',...
-%                 'Missing "fcam.json" at localtion "%s".',...
-%                 this.ConfigFile );
-%         end
-%         
-%         function verifyPrjFileExist( this )
-%             assert( exist( this.PrjFile, 'file' ) == 2,...
-%                 'FCAM:MissingPrjFile',...
-%                 'Missing "%s.prj" at localtion "%s".',...
-%                 this.Configuration.ShortName,...
-%                 this.PrjFile );
-%         end
-%         
-%         function prepareForPackaging( this )
-%             versionLine = sprintf( "%% Version %s (R%s) %s",...
-%                 this.Version,...
-%                 version( '-release' ),...
-%                 datetime( 'now', 'Format', 'dd-MMM-yyyy' ) );
-%             if exist( this.ContentsFile, 'file' ) ~= 2
-%                 oldPath = pwd;
-%                 cd( this.SourceCodeFolder );
-%                 makecontentsfile( this.SourceCodeFolder );
-%                 cd( oldPath );
-%                 contents = splitlines( string( fileread( this.ContentsFile ) ) );
-%                 contents = [...
-%                     contents(1);...
-%                     versionLine;
-%                     contents(2:end);...
-%                     ];
-%             else
-%                 oldPath = pwd;
-%                 cd( this.SourceCodeFolder );
-%                 fixcontents( this.ContentsFile, 'all' );
-%                 cd( oldPath );
-%                 contents = splitlines( string( fileread( this.ContentsFile ) ) );
-%                 contents(2) = versionLine;
-%             end
-%             emptyLines = contents == "";
-%             contents(emptyLines) = [];
-%             file = fopen( this.ContentsFile, 'w' );
-%             closeFile = onCleanup( @() fclose( file ) );
-%             fprintf( file, '%s\n', contents );
-%         end
+        function prepareForPackaging( this )
+            versionLine = sprintf( "%% Version %s (R%s) %s",...
+                this.Version,...
+                version( '-release' ),...
+                datetime( 'now', 'Format', 'dd-MMM-yyyy' ) );
+            if exist( this.ContentsFile, 'file' ) ~= 2
+                oldPath = pwd;
+                cd( this.SourceCodeFolder );
+                makecontentsfile( this.SourceCodeFolder );
+                cd( oldPath );
+                contents = splitlines( string( fileread( this.ContentsFile ) ) );
+                contents = [...
+                    contents(1);...
+                    versionLine;
+                    contents(2:end);...
+                    ];
+            else
+                oldPath = pwd;
+                cd( this.SourceCodeFolder );
+                fixcontents( this.ContentsFile, 'all' );
+                cd( oldPath );
+                contents = splitlines( string( fileread( this.ContentsFile ) ) );
+                contents(2) = versionLine;
+            end
+            emptyLines = contents == "";
+            contents(emptyLines) = [];
+            file = fopen( this.ContentsFile, 'w' );
+            closeFile = onCleanup( @() fclose( file ) );
+            fprintf( file, '%s\n', contents );
+        end
         
     end
     

@@ -1,12 +1,12 @@
-function rmsandbox( varargin )
-    if ~isempty( ver( 'maven' ) )
-        fx.maven.command.rmsandbox( varargin{:} );
+function rmsandbox()
+    if ~isempty( ver( 'fcam' ) )
+        fx.fcam.command.rmsandbox();
     else
         thisPath = fileparts( mfilename( 'fullpath' ) );
         rmpath( fullfile(...
             thisPath,...
             'code',...
-            'maven' ) );
+            'myapp' ) );
         rmpath( fullfile(...
             thisPath,...
             'test' ) );
