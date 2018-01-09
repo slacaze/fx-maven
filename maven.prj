@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.toolbox" plugin-version="1.0">
-  <configuration file="C:\ConsultingProjects\Maven\Toolbox\maven.prj" location="C:\ConsultingProjects\Maven\Toolbox" name="maven" target="target.toolbox" target-name="Package Toolbox">
+  <configuration file="C:\ConsultingProjectsLocal\Z-Internal\Maven\MatlabToolbox\maven.prj" location="C:\ConsultingProjectsLocal\Z-Internal\Maven\MatlabToolbox" name="maven" target="target.toolbox" target-name="Package Toolbox">
     <param.appname>Fx Maven Toolbox</param.appname>
     <param.authnamewatermark>Sylvain Lacaze</param.authnamewatermark>
     <param.email>sylvain.lacaze@mathworks.co.uk</param.email>
@@ -53,7 +53,7 @@
     <fileset.depfun.excluded />
     <fileset.package />
     <build-deliverables>
-      <file location="C:\ConsultingProjects\Maven\Toolbox" name="Fx Maven Toolbox.mltbx" optional="false">C:\ConsultingProjects\Maven\Toolbox\Fx Maven Toolbox.mltbx</file>
+      <file location="C:\ConsultingProjectsLocal\Z-Internal\Maven\MatlabToolbox" name="Fx Maven Toolbox.mltbx" optional="false">C:\ConsultingProjectsLocal\Z-Internal\Maven\MatlabToolbox\Fx Maven Toolbox.mltbx</file>
     </build-deliverables>
     <workflow />
     <matlab>
