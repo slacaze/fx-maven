@@ -201,8 +201,14 @@ classdef ToolboxSandbox < handle
                 testIndex = find( strcmp( suiteName, this.TestPackages(:,1) ), 1, 'first' );
             end
             if isempty( testIndex )
-                testResults = matlab.unittest.TestResult.empty;
-                return;
+                % It was not one of the suite defined in the project,
+                % maybe, it's a package
+                if ~isempty( meta.package.fromName( suiteName ) )
+                    testPackage = suiteName;
+                else
+                    testResults = matlab.unittest.TestResult.empty;
+                    return;
+                end
             else
                 testPackage = this.TestPackages{testIndex,2};
             end
