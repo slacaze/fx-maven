@@ -51,8 +51,8 @@ classdef( Hidden ) Maven
     methods( Static, Hidden, Access = public )
         
         function varargout = run( varargin )
-            [flag, output] = system( ...
-                sprintf( 'mvn %s', strjoin( varargin, ' ' ) ) );
+            command = sprintf( 'mvn %s', strjoin( varargin, ' ' ) );
+            [flag, output] = system( command );
             varargout{1} = output;
             if nargout > 1
                 % Requesting the flag, not erroring out
@@ -68,7 +68,8 @@ classdef( Hidden ) Maven
                 else
                     error( ...
                         'Maven:MavenError', ...
-                        'Maven exception:\n%s\n', ...
+                        'Maven exception on:\n%s\nWith output:\n%s\n', ...
+                        command, ...
                         output );
                 end
             end

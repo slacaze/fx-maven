@@ -1,6 +1,6 @@
 function addsandbox()
-    if ~isempty( ver( 'fcam' ) )
-        fx.fcam.command.addsandbox();
+    if ~isempty( ver( 'maven' ) )
+        fx.maven.command.addsandbox();
     else
         thisPath = fileparts( mfilename( 'fullpath' ) );
         addpath( fullfile(...

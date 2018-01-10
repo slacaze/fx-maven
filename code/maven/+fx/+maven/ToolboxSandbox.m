@@ -29,6 +29,7 @@ classdef ToolboxSandbox < handle
         ContentsFile(1,:) char
         SourceCodeFolder(1,:) char
         TestFolder(1,:) char
+        DependenciesFolder(1,:) char
         TestPackages(:,2) cell
     end
     
@@ -125,6 +126,13 @@ classdef ToolboxSandbox < handle
                 'test' );
         end
         
+        function value = get.DependenciesFolder( this )
+            value = fullfile(...
+                this.Root,...
+                'dependencies', ...
+                'runtime' );
+        end
+        
         function value = get.TestPackages( this )
             value = this.Pom.TestPackages;
         end
@@ -180,9 +188,11 @@ classdef ToolboxSandbox < handle
         function addToPath( this )
             addpath( this.TestFolder, '-end' )
             addpath( this.SourceCodeFolder, '-end' )
+            this.installDependencies();
         end
         
         function removeFromPath( this )
+            this.removeDependencies();
             rmpath( this.TestFolder )
             rmpath( this.SourceCodeFolder )
         end
@@ -226,8 +236,8 @@ classdef ToolboxSandbox < handle
             if inputs.CodeCoverage
                 coberturaReport = matlab.unittest.plugins.codecoverage.CoberturaFormat(...
                     fullfile( this.TestFolder, 'codeCoverage.xml' ) );
-                codeCoverageFolders = fx.fcam.util.getAllFolders( this.SourceCodeFolder );
-                codeCoverageFolders = fx.fcam.util.filterCodeCoveragePaths( codeCoverageFolders );
+                codeCoverageFolders = fx.maven.util.getAllFolders( this.SourceCodeFolder );
+                codeCoverageFolders = fx.maven.util.filterCodeCoveragePaths( codeCoverageFolders );
                 codeCoveragePlugin = matlab.unittest.plugins.CodeCoveragePlugin.forFolder(...
                     codeCoverageFolders,...
                     'IncludingSubfolders', false,...
@@ -354,6 +364,44 @@ classdef ToolboxSandbox < handle
             file = fopen( this.ContentsFile, 'w' );
             closeFile = onCleanup( @() fclose( file ) );
             fprintf( file, '%s\n', contents );
+        end
+        
+        function installDependencies( this )
+            this.removeDependencies();
+            if exist( this.DependenciesFolder, 'dir' ) == 7
+                % We move the AddOns in a temporary directory
+                thisSettings = settings;
+                thisSettings.matlab.addons.InstallationFolder.TemporaryValue = tempname;
+                % Install all AddOns
+                dependentAddOns = dir( fullfile( this.DependenciesFolder, '*.mltbx' ) );
+                for addOnIndex = 1:numel( dependentAddOns )
+                    thisAddOn = dependentAddOns(addOnIndex);
+                    matlab.addons.toolbox.installToolbox( ...
+                        fullfile( thisAddOn.folder, thisAddOn.name ) );
+                end
+            end
+        end
+        
+        function removeDependencies( ~ )
+            thisSettings = settings;
+            try
+                % Try reading the temporary value
+                thisSettings.matlab.addons.InstallationFolder.TemporaryValue;
+                % If we can, we should deck all AddOns
+                removeAllToolboxes = true;
+            catch
+                % If we couldn't AddOns are the system ones, leave them
+                % alone
+                removeAllToolboxes = false;
+            end
+            if removeAllToolboxes
+                addOns = matlab.addons.toolbox.installedToolboxes();
+                for addOnIndex = 1:numel(addOns)
+                    thisAddOn = addOns(addOnIndex);
+                    matlab.addons.toolbox.uninstallToolbox( thisAddOn );
+                end
+                thisSettings.matlab.addons.InstallationFolder.clearTemporaryValue();
+            end
         end
         
     end
