@@ -1,9 +1,18 @@
 function packagesandbox( varargin )
     parser = inputParser;
     parser.addOptional( 'Path', pwd,...
-        @fx.fcam.util.mustBeValidPath );
+        @fx.maven.util.mustBeValidPath );
+    parser.addParameter( 'OutputFile', '',...
+        @fx.maven.util.mustBeValidPath );
     parser.parse( varargin{:} );
     inputs = parser.Results;
     sandbox = fx.maven.ToolboxSandbox( inputs.Path );
-    sandbox.package();
+    if any( strcmp( 'OutputFile', parser.UsingDefaults ) )
+        inputs.OutputFile = fullfile(...
+            sandbox.Root,...
+            sprintf( '%s v%s.mltbx',...
+            sandbox.Name,...
+            sandbox.Version ) );
+    end
+    sandbox.package( inputs.OutputFile );
 end
