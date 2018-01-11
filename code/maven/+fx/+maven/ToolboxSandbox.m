@@ -367,41 +367,22 @@ classdef ToolboxSandbox < handle
         end
         
         function installDependencies( this )
-            this.removeDependencies();
+            fx.maven.Maven.copyDependencies();
             if exist( this.DependenciesFolder, 'dir' ) == 7
-                % We move the AddOns in a temporary directory
-                thisSettings = settings;
-                thisSettings.matlab.addons.InstallationFolder.TemporaryValue = tempname;
                 % Install all AddOns
                 dependentAddOns = dir( fullfile( this.DependenciesFolder, '*.mltbx' ) );
                 for addOnIndex = 1:numel( dependentAddOns )
                     thisAddOn = dependentAddOns(addOnIndex);
-                    matlab.addons.toolbox.installToolbox( ...
+                    fx.maven.AddOnManager.addDependency( ...
+                        sprintf( '%s:%s', this.Pom.GroupId, this.Pom.ArtifactId ), ...
                         fullfile( thisAddOn.folder, thisAddOn.name ) );
                 end
             end
         end
         
-        function removeDependencies( ~ )
-            thisSettings = settings;
-            try
-                % Try reading the temporary value
-                thisSettings.matlab.addons.InstallationFolder.TemporaryValue;
-                % If we can, we should deck all AddOns
-                removeAllToolboxes = true;
-            catch
-                % If we couldn't AddOns are the system ones, leave them
-                % alone
-                removeAllToolboxes = false;
-            end
-            if removeAllToolboxes
-                addOns = matlab.addons.toolbox.installedToolboxes();
-                for addOnIndex = 1:numel(addOns)
-                    thisAddOn = addOns(addOnIndex);
-                    matlab.addons.toolbox.uninstallToolbox( thisAddOn );
-                end
-                thisSettings.matlab.addons.InstallationFolder.clearTemporaryValue();
-            end
+        function removeDependencies( this )
+            fx.maven.AddOnManager.removeDependencies( ...
+                sprintf( '%s:%s', this.Pom.GroupId, this.Pom.ArtifactId ) );
         end
         
     end

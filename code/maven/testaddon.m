@@ -1,5 +1,6 @@
 function testResults = testaddon( varargin )
     % Run the tests on the packaged Add-On
+    % 
     % Runs a test suite defined in "pom.xml" on the packaged Add-On.
     %
     %   testaddon() runs the first test suite defined in "pom.xml", for the

@@ -1,6 +1,6 @@
 function mksandbox( varargin )
     % Create a new sandbox
-    %
+    % 
     % Creates a new sandbox, with a starting fodler structure, a POM file,
     % and PRJ file, some generic starting packages and functions.
     %
@@ -16,7 +16,7 @@ function mksandbox( varargin )
     %   ID, group ID, and creates the sandbox in the specified "path".
     %
     %   Example
-    %      mksandbox( filesystem );
+    %      mksandbox( 'filesystem' );
     %      packagesandbox();
     %      ver filesystem
     %

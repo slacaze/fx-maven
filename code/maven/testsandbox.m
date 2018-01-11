@@ -1,5 +1,6 @@
 function testResults = testsandbox( varargin )
     % Run the tests of the sandbox
+    % 
     % Runs a test suite defined in "pom.xml" on the sandbox.
     %
     %   testsandbox() runs the first test suite defined in "pom.xml", for

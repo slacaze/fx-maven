@@ -7,6 +7,7 @@ classdef PomFile < fx.maven.internal.File
     
     properties( GetAccess = public, SetAccess = public, Dependent )
         ArtifactId(1,:) char
+        GroupId(1,:) char
         TestPackages(:,2) cell
     end
     
@@ -71,6 +72,16 @@ classdef PomFile < fx.maven.internal.File
                 'The artifactId is missing from "%s".', ...
                 this.FilePath );
             value = artifactElement.Text;
+        end
+        
+        function value = get.GroupId( this )
+            recursive = false;
+            groupElement = this.Project.getElementsByTagName( 'groupId', recursive );
+            assert( isscalar( groupElement ), ...
+                'Maven:MissingGroupId', ...
+                'The groupId is missing from "%s".', ...
+                this.FilePath );
+            value = groupElement.Text;
         end
         
         function value = get.TestPackages( this )

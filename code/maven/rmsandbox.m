@@ -1,6 +1,6 @@
 function rmsandbox( varargin )
     % Remove the sandbox from the MATLAB path
-    %
+    % 
     % Removes the source code, and the test folders of the sandbox from the
     % MATLAB path. A "pom.xml" must be present to define the sandbox.
     %

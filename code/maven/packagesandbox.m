@@ -1,5 +1,6 @@
 function packagesandbox( varargin )
     % Package the sandbox into an MLTBX
+    % 
     % Packages the sandbox into an MLTBX, using the "pom.xml" and the PRJ
     % file.
     %
@@ -8,7 +9,7 @@ function packagesandbox( varargin )
     %   packagesandbox( path ) packages the sandbox in the "path" location.
     %
     %   Example
-    %      mksandbox( 'ShortName', 'filesystem' );
+    %      mksandbox( 'filesystem' );
     %      packagesandbox();
     %      ver filesystem
     %

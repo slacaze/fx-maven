@@ -1,6 +1,6 @@
 function addsandbox( varargin )
     % Add the sandbox to the MATLAB path
-    %
+    % 
     % Adds the source code, and the test folders to the MATLAB path. A
     % "pom.xml" must be present to define the sandbox.
     %
