@@ -10,3 +10,4 @@
 %   testaddon          - Run the tests on the packaged Add-On
 %   testsandbox        - Run the tests of the sandbox
 %   installMavenPlugin - Installs the Maven elements.
+%   installsandbox     - Install the sandbox on Maven
