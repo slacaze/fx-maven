@@ -13,7 +13,8 @@ function packagesandbox( varargin )
     %      packagesandbox();
     %      ver filesystem
     %
-    %   See also mksandbox, addsandbox, rmsandbox, testsandbox, testaddon
+    %   See also mksandbox, addsandbox, rmsandbox, testsandbox, testaddon,
+    %   installsandbox
     
     fx.maven.command.packagesandbox( varargin{:} );
 end

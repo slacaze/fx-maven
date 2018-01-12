@@ -14,7 +14,7 @@ function addsandbox( varargin )
     %      addsandbox();
     %
     %   See also mksandbox, rmsandbox, testsandbox, testaddon,
-    %   packagesandbox
+    %   packagesandbox, installsandbox
     
     fx.maven.command.addsandbox( varargin{:} );
 end

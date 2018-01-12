@@ -82,7 +82,7 @@ classdef( Hidden ) AddOnManager < handle
                     thisDependencyGuid, ...
                     instance.Dependencies.Guid(~dependenciesIndex) ) );
                 if ~alsoUsed
-                    matlab.addons.toolbox.uninstallToolbox( thisDependency );
+                    fx.maven.AddOnManager.uninstallToolbox( thisDependency );
                     removed(dependencyIndex) = true;
                 end
             end
@@ -97,6 +97,30 @@ classdef( Hidden ) AddOnManager < handle
         
         function this = getInstance()
             this = fx.maven.AddOnManager();
+        end
+        
+        function uninstallToolbox( dependency )
+            lastwarn( '' );
+            manualCleanupId = 'toolboxmanagement_matlab_api:uninstallToolbox:manualCleanupNeeded';
+            oldWarning = warning( 'off', manualCleanupId );
+            restoreWarningSettings = onCleanup( @() warning( oldWarning ) );
+            matlab.addons.toolbox.uninstallToolbox( dependency );
+            % Try to help delete stuff
+            [warningMsg, warningId] = lastwarn();
+            if strcmp( warningId, manualCleanupId )
+                token = regexp( warningMsg, 'manually delete: (.+)', 'once', 'tokens' );
+                path = token{1};
+                numberOfTries = 3;
+                success = false;
+                for tryIndex = 1:numberOfTries
+                    if ~success && exist( path, 'dir' ) == 7
+                        success = rmdir( path, 's' );
+                    end
+                end
+                if ~success
+                    warning( warningId, warningMsg );
+                end
+            end
         end
         
     end

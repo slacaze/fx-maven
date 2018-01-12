@@ -19,7 +19,7 @@ function testResults = testaddon( varargin )
     %      testaddon( 'unittest' );
     %
     %   See also mksandbox, addsandbox, rmsandbox, testsandbox,
-    %   packagesandbox
+    %   packagesandbox, installsandbox
     
     testResults = fx.maven.command.testaddon( varargin{:} );
 end

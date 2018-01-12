@@ -317,6 +317,14 @@ classdef ToolboxSandbox < handle
             fx.maven.util.flushEventQueue();
         end
         
+        function installOnMaven( this )
+            fx.maven.Maven.install( ...
+                this.Root, ...
+                false, ...
+                '-DrunSandboxTests=false', ...
+                '-DrunAddOnTests=false' );
+        end
+        
 %         function enableAddOn( this )
 %             addOns = matlab.addons.installedAddons();
 %             if any( strcmp( this.Guid, addOns.Identifier ) )
