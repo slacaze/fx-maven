@@ -6,14 +6,37 @@ This repository holds a MATLAB Toolbox which uses Maven to help:
 - Manage dependencies
 - Manage lifecycle
 
-## Usage
+## Coordinates
+
+```maven-pom
+<groupId>fx.maven</groupId>
+<artifactId>maven</artifactId>
+<version>1.0-SNAPSHOT</version>
+```
+
+## Setup
 
 Install the [latest MLTBX](release/latest/).
 
 Make sure that all Maven artifacts are installed by running:
 
-```
+```matlab
 >> installMavenPlugin();
+```
+
+## Getting started
+
+```matlab
+>> mkdir myNewFolder
+>> cd myNewFolder
+>> mksandbox myapp fx
+>> installsandbox()
+```
+
+## Help
+
+```matlab
+>> help maven
 ```
 
 ## Requirements
