@@ -8,7 +8,7 @@ This repository holds a MATLAB Toolbox which uses Maven to help:
 
 ## Usage
 
-Install the [latest MLTBX](https://github.com/slacaze/fx-maven/tree/master/release/latest/).
+Install the [latest MLTBX](release/latest/).
 
 Make sure that all Maven artifacts are installed by running:
 
