@@ -1,0 +1,125 @@
+{
+    "_schemaVersion": "1.0.0",
+    "addsandbox": {
+        "inputs": [{
+            "name": "path",
+            "kind": "positional",
+            "type": [
+                ["filepath=*.someinexistantextension"],
+                ["char"]
+            ],
+            "default": "pwd"
+        }]
+    },
+    "installMavenPlugin": {
+        "inputs": [{
+            "name": "RunTests",
+            "kind": "namevalue",
+            "type": [
+                ["logical"],
+                ["scalar"]
+            ],
+            "default": "true"
+        }, {
+            "name": "Verbose",
+            "kind": "namevalue",
+            "type": [
+                ["logical"],
+                ["scalar"]
+            ],
+            "default": "true"
+        }]
+    },
+    "mavenroot": {},
+    "mksandbox": {
+        "inputs": [{
+            "name": "artifactId",
+            "kind": "positional",
+            "type": "char",
+            "default": "myapp"
+        }, {
+            "name": "groupId",
+            "kind": "positional",
+            "type": "char",
+            "default": "fx"
+        }, {
+            "name": "path",
+            "kind": "positional",
+            "type": [
+                ["filepath=*.someinexistantextension"],
+                ["char"]
+            ],
+            "default": "pwd"
+        }]
+    },
+    "packagesandbox": {
+        "inputs": [{
+            "name": "path",
+            "kind": "positional",
+            "type": [
+                ["filepath=*.someinexistantextension"],
+                ["char"]
+            ],
+            "default": "pwd"
+        }]
+    },
+    "rmsandbox": {
+        "inputs": [{
+            "name": "path",
+            "kind": "positional",
+            "type": [
+                ["filepath=*.someinexistantextension"],
+                ["char"]
+            ],
+            "default": "pwd"
+        }]
+    },
+    "testaddon": {
+        "inputs": [{
+            "name": "path",
+            "kind": "positional",
+            "type": [
+                ["filepath=*.someinexistantextension"],
+                ["char"]
+            ],
+            "default": "pwd"
+        }, {
+            "name": "suiteName",
+            "kind": "positional",
+            "type": "char",
+            "default": "all"
+        }]
+    },
+    "testaddon": {
+        "inputs": [{
+            "name": "suiteName",
+            "kind": "required",
+            "type": "char",
+            "default": "all"
+        }]
+    },
+    "testsandbox": {
+        "inputs": [{
+            "name": "path",
+            "kind": "positional",
+            "type": [
+                ["filepath=*.someinexistantextension"],
+                ["char"]
+            ],
+            "default": "pwd"
+        }, {
+            "name": "suiteName",
+            "kind": "positional",
+            "type": "char",
+            "default": "all"
+        }]
+    },
+    "testsandbox": {
+        "inputs": [{
+            "name": "suiteName",
+            "kind": "required",
+            "type": "char",
+            "default": "all"
+        }]
+    }
+}

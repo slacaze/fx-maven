@@ -1,0 +1,59 @@
+<deployment-project plugin="plugin.toolbox" plugin-version="1.0">
+    <configuration file="_PRJ_FULLPATH_MCAM_MARKER_" location="_PRJ_PARENT_FOLDER_MCAM_MARKER_" name="_PRJ_FILENAME_MCAM_MARKER_" target="target.toolbox" target-name="Package Toolbox">
+        <param.appname />
+        <param.authnamewatermark />
+        <param.email />
+        <param.company />
+        <param.summary />
+        <param.description />
+        <param.screenshot />
+        <param.version />
+        <param.products.name />
+        <param.products.id />
+        <param.products.version />
+        <param.platforms />
+        <param.guid />
+        <param.exclude.filters />
+        <param.examples />
+        <param.demosxml />
+        <param.apps />
+        <param.registered.apps />
+        <param.docs />
+        <param.getting.started.guide />
+        <param.matlabpath.excludes>
+            <item>/</item>
+        </param.matlabpath.excludes>
+        <param.javaclasspath.excludes />
+        <unset>
+            <param.appname />
+            <param.authnamewatermark />
+            <param.email />
+            <param.company />
+            <param.summary />
+            <param.description />
+            <param.screenshot />
+            <param.version />
+            <param.output />
+            <param.products.name />
+            <param.products.id />
+            <param.products.version />
+            <param.platforms />
+            <param.guid />
+            <param.exclude.filters />
+            <param.examples />
+            <param.demosxml />
+            <param.apps />
+            <param.registered.apps />
+            <param.docs />
+            <param.getting.started.guide />
+            <param.javaclasspath.excludes />
+        </unset>
+        <fileset.rootdir>
+            <file>${PROJECT_ROOT}\code</file>
+        </fileset.rootdir>
+        <fileset.depfun.included />
+        <fileset.depfun.excluded />
+        <fileset.package />
+        <workflow />
+    </configuration>
+</deployment-project>
