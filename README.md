@@ -11,7 +11,7 @@ This repository holds a MATLAB Toolbox which uses Maven to help:
 ```maven-pom
 <groupId>fx.maven</groupId>
 <artifactId>maven</artifactId>
-<version>1.0-SNAPSHOT</version>
+<version>1.0.0</version>
 ```
 
 ## Setup
